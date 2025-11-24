@@ -20,6 +20,5 @@ public class RobotConfig {
         public static final double kMaxAcceleration = 0.5;
 
         public static final double kMetersPerRotation = 0;
-        //public static final Distance kMaxHeight = 3; //meters
     }
 }
