@@ -35,12 +35,11 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     private PIDController pid = new PIDController(kP, kI, kD);
 
-    private TalonFX leader = new TalonFX(1);
+    private TalonFX leader = new TalonFX(0);
 
-    private Follower follower = new Follower(1, false);
+    private Follower follower = new Follower(0, false);
 
     private DutyCycleOut leaderDutyCycleOut = new DutyCycleOut(0.0);
-    private DutyCycleOut followerDutyCycleOut = new DutyCycleOut(0.0);
 
     private ElevatorFeedforward feedforward = new ElevatorFeedforward(kS, kG, kV, kA);
 
@@ -66,7 +65,7 @@ public class ElevatorSubsystem extends SubsystemBase{
         new SysIdRoutine.Config(),
         new SysIdRoutine.Mechanism(
         volts-> leader.setControl(voltageOut.withOutput(volts.in(Volts))),
-        log -> log.motor("foo")
+        log -> log.motor("Leader")
             .angularAcceleration(null)
             .angularPosition(null)
             .angularVelocity(null)

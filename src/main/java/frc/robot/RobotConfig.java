@@ -1,9 +1,12 @@
 package frc.robot;
 
-import edu.wpi.first.units.measure.Distance;
-
 public class RobotConfig {
     public static final class ElevatorConfig{
+        //Elevator measurements (in meters)
+        public static final double kBottomHeight = 0;
+        public static final double kMiddleHeight = 0;        
+        public static final double kMaxHeight = 0;
+
         //PID constants
         public static final double kP = 0.1;
         public static final double kI = 0.0;
@@ -19,6 +22,7 @@ public class RobotConfig {
         public static final double kMaxVelocity = 1.0;
         public static final double kMaxAcceleration = 0.5;
 
+        //Conversion from motor rotations to elevator height
         public static final double kMetersPerRotation = 0;
     }
 }
