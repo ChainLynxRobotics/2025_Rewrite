@@ -12,11 +12,10 @@ import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.Volts;
-import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 import static frc.robot.RobotConfig.ElevatorConfig.kA;
 import static frc.robot.RobotConfig.ElevatorConfig.kD;
 import static frc.robot.RobotConfig.ElevatorConfig.kG;
@@ -85,18 +84,19 @@ public class ElevatorSubsystem extends SubsystemBase{
         leader.getConfigurator().apply(feedbackConfigs);
     }
 
-    public Distance getHeight() {
-        return Meters.of(leader.getPosition().getValueAsDouble());
+    @Override
+    public void periodic() {
+        currentSetpoint = trapezoidProfile.calculate(0.02, currentSetpoint, goalSetpoint);
+        leader.set(pid.calculate(getHeight(), currentSetpoint.position));
+        sysIdRoutine.dynamic(kForward);
+    }
+
+    public double getHeight() {
+        return leader.getPosition().getValueAsDouble();
     }
 
     public void setHeight(double height) {
         goalSetpoint = new TrapezoidProfile.State(height, 0);
-    }
-
-    @Override
-    public void periodic() {
-        currentSetpoint = trapezoidProfile.calculate(0.02, currentSetpoint, goalSetpoint);
-        leader.set(pid.calculate(getHeight().in(Meters), currentSetpoint.position));
     }
 
     public void reset() {
