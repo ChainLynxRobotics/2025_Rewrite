@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.epilogue.Epilogue;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.Logged.Importance;
 import edu.wpi.first.epilogue.logging.FileBackend;
@@ -12,7 +13,6 @@ import edu.wpi.first.wpilibj.DataLogManager;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import edu.wpi.first.epilogue.Epilogue;
 
 public class Robot extends TimedRobot {
 
@@ -26,28 +26,29 @@ public class Robot extends TimedRobot {
   public Robot() {
     m_robotContainer = new RobotContainer();
 
-        // Initialize data logging.
-        DataLogManager.start();
+    // Initialize data logging.
+    DataLogManager.start();
 
-    Epilogue.configure(config -> {
-      // Log only to disk, instead of the default NetworkTables logging
-      // Note that this means data cannot be analyzed in realtime by a dashboard
-      config.backend = new FileBackend(DataLogManager.getLog());
+    Epilogue.configure(
+        config -> {
+          // Log only to disk, instead of the default NetworkTables logging
+          // Note that this means data cannot be analyzed in realtime by a dashboard
+          config.backend = new FileBackend(DataLogManager.getLog());
 
-      if (isSimulation()) {
-        // If running in simulation, then we'd want to re-throw any errors that
-        // occur so we can debug and fix them!
-        config.errorHandler = ErrorHandler.crashOnError();
-      }
+          if (isSimulation()) {
+            // If running in simulation, then we'd want to re-throw any errors that
+            // occur so we can debug and fix them!
+            config.errorHandler = ErrorHandler.crashOnError();
+          }
 
-      // Change the root data path
-      config.root = "Telemetry";
-    });
+          // Change the root data path
+          config.root = "Telemetry";
+        });
   }
 
   @Override
   public void robotPeriodic() {
-    CommandScheduler.getInstance().run(); 
+    CommandScheduler.getInstance().run();
   }
 
   @Override
