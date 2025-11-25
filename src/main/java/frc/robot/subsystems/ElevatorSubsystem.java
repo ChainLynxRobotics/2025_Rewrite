@@ -1,20 +1,6 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
-import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.hardware.TalonFX;
-
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import static edu.wpi.first.units.Units.Volts;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
 import static frc.robot.RobotConfig.ElevatorConfig.kA;
 import static frc.robot.RobotConfig.ElevatorConfig.kD;
@@ -27,78 +13,95 @@ import static frc.robot.RobotConfig.ElevatorConfig.kP;
 import static frc.robot.RobotConfig.ElevatorConfig.kS;
 import static frc.robot.RobotConfig.ElevatorConfig.kV;
 
-public class ElevatorSubsystem extends SubsystemBase{
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
+import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 
-    private Constraints constraints = new Constraints(kMaxVelocity, kMaxAcceleration);
+public class ElevatorSubsystem extends SubsystemBase {
 
-    private TrapezoidProfile trapezoidProfile = new TrapezoidProfile(constraints);
+  private Constraints constraints = new Constraints(kMaxVelocity, kMaxAcceleration);
 
-    private PIDController pid = new PIDController(kP, kI, kD);
+  private TrapezoidProfile trapezoidProfile = new TrapezoidProfile(constraints);
 
-    private TalonFX leader = new TalonFX(0);
+  private PIDController pid = new PIDController(kP, kI, kD);
 
-    private Follower follower = new Follower(0, false);
+  private TalonFX leader = new TalonFX(0);
 
-    private DutyCycleOut leaderDutyCycleOut = new DutyCycleOut(0.0);
+  private Follower follower = new Follower(0, false);
 
-    private ElevatorFeedforward feedforward = new ElevatorFeedforward(kS, kG, kV, kA);
+  private DutyCycleOut leaderDutyCycleOut = new DutyCycleOut(0.0);
 
-    private DynamicMotionMagicVoltage motionMagicVoltage = new DynamicMotionMagicVoltage(0, 0,0, 0);
+  private ElevatorFeedforward feedforward = new ElevatorFeedforward(kS, kG, kV, kA);
 
-    private VoltageOut voltageOut = new VoltageOut(0.0);
+  private DynamicMotionMagicVoltage motionMagicVoltage = new DynamicMotionMagicVoltage(0, 0, 0, 0);
 
-    private Slot0Configs slot0Configs = new Slot0Configs()
-    .withKP(kP)
-    .withKI(kI)
-    .withKD(kD)
-    .withKV(kV)
-    .withKA(kA)
-    .withKG(kG)
-    .withKS(kS);
+  private VoltageOut voltageOut = new VoltageOut(0.0);
 
-    FeedbackConfigs feedbackConfigs = new FeedbackConfigs().withSensorToMechanismRatio(kMetersPerRotation);
+  private Slot0Configs slot0Configs =
+      new Slot0Configs()
+          .withKP(kP)
+          .withKI(kI)
+          .withKD(kD)
+          .withKV(kV)
+          .withKA(kA)
+          .withKG(kG)
+          .withKS(kS);
 
-    private TrapezoidProfile.State currentSetpoint = new TrapezoidProfile.State();
-    private TrapezoidProfile.State goalSetpoint = new TrapezoidProfile.State();
+  FeedbackConfigs feedbackConfigs =
+      new FeedbackConfigs().withSensorToMechanismRatio(kMetersPerRotation);
 
-    SysIdRoutine sysIdRoutine = new SysIdRoutine(
-        new SysIdRoutine.Config(),
-        new SysIdRoutine.Mechanism(
-        volts-> leader.setControl(voltageOut.withOutput(volts.in(Volts))),
-        log -> log.motor("Leader")
-            .angularAcceleration(null)
-            .angularPosition(null)
-            .angularVelocity(null)
-            .current(null)
-            .linearAcceleration(null)
-            .linearPosition(null)
-            .linearVelocity(null)
-            .voltage(null),
-        this)
-    );
+  private TrapezoidProfile.State currentSetpoint = new TrapezoidProfile.State();
+  private TrapezoidProfile.State goalSetpoint = new TrapezoidProfile.State();
 
-    public ElevatorSubsystem() {
-        leader.setControl(leaderDutyCycleOut);
-        leader.getConfigurator().apply(slot0Configs);
-        leader.getConfigurator().apply(feedbackConfigs);
-    }
+  SysIdRoutine sysIdRoutine =
+      new SysIdRoutine(
+          new SysIdRoutine.Config(),
+          new SysIdRoutine.Mechanism(
+              volts -> leader.setControl(voltageOut.withOutput(volts.in(Volts))),
+              log ->
+                  log.motor("Leader")
+                      .angularAcceleration(null)
+                      .angularPosition(null)
+                      .angularVelocity(null)
+                      .current(null)
+                      .linearAcceleration(null)
+                      .linearPosition(null)
+                      .linearVelocity(null)
+                      .voltage(null),
+              this));
 
-    @Override
-    public void periodic() {
-        currentSetpoint = trapezoidProfile.calculate(0.02, currentSetpoint, goalSetpoint);
-        leader.set(pid.calculate(getHeight(), currentSetpoint.position));
-        sysIdRoutine.dynamic(kForward);
-    }
+  public ElevatorSubsystem() {
+    leader.setControl(leaderDutyCycleOut);
+    leader.getConfigurator().apply(slot0Configs);
+    leader.getConfigurator().apply(feedbackConfigs);
+  }
 
-    public double getHeight() {
-        return leader.getPosition().getValueAsDouble();
-    }
+  @Override
+  public void periodic() {
+    currentSetpoint = trapezoidProfile.calculate(0.02, currentSetpoint, goalSetpoint);
+    leader.set(pid.calculate(getHeight(), currentSetpoint.position));
+    sysIdRoutine.dynamic(kForward);
+}
 
-    public void setHeight(double height) {
-        goalSetpoint = new TrapezoidProfile.State(height, 0);
-    }
+  public double getHeight() {
+    return leader.getPosition().getValueAsDouble();
+  }
 
-    public void reset() {
-        this.setHeight(0.0);
-    }
+  public void setHeight(double height) {
+    goalSetpoint = new TrapezoidProfile.State(height, 0);
+  }
+
+  public void reset() {
+    this.setHeight(0.0);
+  }
 }
