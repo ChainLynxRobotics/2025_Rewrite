@@ -65,8 +65,17 @@ public class ElevatorSubsystem extends SubsystemBase{
 
     SysIdRoutine sysIdRoutine = new SysIdRoutine(
         new SysIdRoutine.Config(),
-        new SysIdRoutine.Mechanism(volts-> leader.setControl(voltageOut.withOutput(volts.in(Volts))),
-        null,
+        new SysIdRoutine.Mechanism(
+        volts-> leader.setControl(voltageOut.withOutput(volts.in(Volts))),
+        log -> log.motor("foo")
+            .angularAcceleration(null)
+            .angularPosition(null)
+            .angularVelocity(null)
+            .current(null)
+            .linearAcceleration(null)
+            .linearPosition(null)
+            .linearVelocity(null)
+            .voltage(null),
         this)
     );
 
