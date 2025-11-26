@@ -1,9 +1,9 @@
 package frc.robot.subsystems;
 
 public class ManipulatorConstants {
-    public static final Integer kPrimaryWristMotor = 12;
+    public static final Integer kRotationalMotor = 12;
 
-    public static final Integer kSecondaryWristMotor = 13;
+    public static final Integer kSideMotor = 13;
 
     public static final double kP = 0.020; // proportion
     public static final double kI = 0.002; // integral

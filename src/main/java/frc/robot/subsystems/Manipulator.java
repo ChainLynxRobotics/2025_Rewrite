@@ -4,7 +4,7 @@ import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
-import static edu.wpi.first.units.Units.Rotation;
+import static edu.wpi.first.units.Units.*;
 
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -14,24 +14,35 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 public class Manipulator extends SubsystemBase {
 
-  final SparkMax primaryMotor =
-    new SparkMax(ManipulatorConstants.kPrimaryWristMotor, MotorType.kBrushless);
-  final SparkMax secondaryMotor =
-    new SparkMax(ManipulatorConstants.kSecondaryWristMotor, MotorType.kBrushless);
-  final TrapezoidProfile movementProfile =
+  final SparkMax rotationalMotor =
+    new SparkMax(ManipulatorConstants.kRotationalMotor, MotorType.kBrushless);
+  final SparkMax sideMotor =
+    new SparkMax(ManipulatorConstants.kSideMotor, MotorType.kBrushless);
+
+  final TrapezoidProfile movementProfileRot =
+    new TrapezoidProfile(new Constraints(ManipulatorConstants.kMaxVel, ManipulatorConstants.kMaxAcc));
+  final TrapezoidProfile movementProfileSide =
     new TrapezoidProfile(new Constraints(ManipulatorConstants.kMaxVel, ManipulatorConstants.kMaxAcc));
 
-  public PIDController pidControler;
 
-  private TrapezoidProfile.State goalSetpoint =
+  public PIDController pidControlerRotate;
+
+  public PIDController pidControlerSide;
+
+  private TrapezoidProfile.State goalSetpointRot =
     new TrapezoidProfile.State();
-  private TrapezoidProfile.State periodicSetpoint =
+  private TrapezoidProfile.State goalSetpointSide =
+    new TrapezoidProfile.State();
+  private TrapezoidProfile.State periodicSetpointRot =
+    new TrapezoidProfile.State();
+  private TrapezoidProfile.State periodicSetpointSide =
     new TrapezoidProfile.State();
 
   private final SparkMaxConfig motorConfig = new SparkMaxConfig();
@@ -40,20 +51,25 @@ public class Manipulator extends SubsystemBase {
 
   public Angle targetRotation = Rotation.of(0); 
 
+  public LinearVelocity targetVelocity = MetersPerSecond.of(0);
 
   public Manipulator() {
     motorConfig
         .smartCurrentLimit(30)
         .idleMode(IdleMode.kBrake);
 
-    primaryMotor.configure(
+    rotationalMotor.configure(
         motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    secondaryMotor.configure(
+    sideMotor.configure(
         motorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-    pidControler = new PIDController(ManipulatorConstants.kP, ManipulatorConstants.kI, ManipulatorConstants.kD);
-    pidControler.setTolerance(ManipulatorConstants.kTolerance);
+    pidControlerRotate = new PIDController(ManipulatorConstants.kP, ManipulatorConstants.kI, ManipulatorConstants.kD);
+    pidControlerRotate.setTolerance(ManipulatorConstants.kTolerance);
+
+    pidControlerSide = new PIDController(ManipulatorConstants.kP, ManipulatorConstants.kI, ManipulatorConstants.kD);
+    pidControlerSide.setTolerance(ManipulatorConstants.kTolerance);
+    
     reset(); //Add the Reset Function 
   }
 
@@ -83,10 +99,17 @@ public class Manipulator extends SubsystemBase {
 
   @Override
   public void periodic() {
-    periodicSetpoint = movementProfile.calculate(ManipulatorConstants.kT, periodicSetpoint, goalSetpoint);
+    periodicSetpointRot = movementProfileRot.calculate(ManipulatorConstants.kT, periodicSetpointRot, goalSetpointRot);
 
-    double speed = pidControler.calculate(getCurrentAngle(), periodicSetpoint.position); //Get current angle Function
-    setMotors(speed); //Set Motors Function
+    periodicSetpointSide = movementProfileSide.calculate(ManipulatorConstants.kT, periodicSetpointSide, goalSetpointSide);
+
+
+    double speedRot = pidControlerRotate.calculate(getCurrentAngleRot(), periodicSetpointRot.position); //Get current angle Function
+
+    double speedSide = pidControlerSide.calculate(getCurrentAngleSide(), periodicSetpointSide.position);
+
+    rotationalMotor.set(speedRot);
+    sideMotor.set(speedSide);
   }
 
   @Override
@@ -94,34 +117,37 @@ public class Manipulator extends SubsystemBase {
     // This method will be called once per scheduler run during simulation
   }
 
-  public double getCurrentAngle() {
-    return (primaryMotor.getAbsoluteEncoder().getPosition() - ManipulatorConstants.kEncoderOffset) * 360
+  public double getCurrentAngleRot() {
+    return (rotationalMotor.getAbsoluteEncoder().getPosition() - ManipulatorConstants.kEncoderOffset) * 360
         + ManipulatorConstants.kCadPositionOffset;
   }
 
-  public boolean isAtPosition() {
-    return pidControler.atSetpoint();
+  public double getCurrentAngleSide() {
+    return (sideMotor.getAbsoluteEncoder().getPosition() - ManipulatorConstants.kEncoderOffset) * 360
+        + ManipulatorConstants.kCadPositionOffset;
+  }
+
+
+  public boolean isAtPositionRot() {
+    return pidControlerRotate.atSetpoint();
+  }
+
+  public boolean isAtPositionSide() {
+    return pidControlerSide.atSetpoint();
   }
 
   public void reset() {
-
-    pidControler.reset();
-
-    stopped = new TrapezoidProfile.State(getCurrentAngle(), 0);
-
-    goalSetpoint = stopped;
-    periodicSetpoint = stopped;
-
-    setMotors(0);
+    setGoalRot(Rotations.of(0));
+    setGoalSide(Rotations.of(0));
   }
 
-  private void setMotors(double speed) {
-    primaryMotor.set(speed);
-    secondaryMotor.set(-speed);
+  protected void setGoalRot(Angle rotation) {
+    goalSetpointRot = new TrapezoidProfile.State(rotation.baseUnitMagnitude(), 0);
+    targetRotation = rotation;
   }
 
-  protected void setGoal(Angle rotation) {
-    goalSetpoint = new TrapezoidProfile.State(rotation.baseUnitMagnitude(), 0);
+  protected void setGoalSide(Angle rotation) {
+    goalSetpointSide = new TrapezoidProfile.State(rotation.baseUnitMagnitude(), 0);
     targetRotation = rotation;
   }
 
