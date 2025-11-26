@@ -4,13 +4,13 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveRequest;
-
-import edu.wpi.first.math.geometry.Rotation2d;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
@@ -94,9 +94,10 @@ public class RobotContainer {
 
     drivetrain.registerTelemetry(logger::telemeterize);
 
-      joystick.a().onTrue(elevator.setElevatorHeight(ElevatorState.LOW));
-      joystick.b().onTrue(elevator.setElevatorHeight(ElevatorState.MID));
-      joystick.x().onTrue(elevator.setElevatorHeight(ElevatorState.HIGH));
+    joystick.a().onTrue(elevator.setElevatorHeight(ElevatorState.L1));
+    joystick.b().onTrue(elevator.setElevatorHeight(ElevatorState.L2));
+    joystick.x().onTrue(elevator.setElevatorHeight(ElevatorState.L3));
+    joystick.y().onTrue(elevator.setElevatorHeight(ElevatorState.L4));
   }
 
   public Command getAutonomousCommand() {
