@@ -91,7 +91,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     currentSetpoint = trapezoidProfile.calculate(0.02, currentSetpoint, goalSetpoint);
     leader.set(pid.calculate(getHeight(), currentSetpoint.position));
     sysIdRoutine.dynamic(kForward);
-}
+  }
 
   public double getHeight() {
     return leader.getPosition().getValueAsDouble();
