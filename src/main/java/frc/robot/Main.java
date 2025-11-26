@@ -3,7 +3,7 @@
 // the WPILib BSD license file in the root directory of this project.
 
 package frc.robot;
-
+import java.util.Random;
 import edu.wpi.first.wpilibj.RobotBase;
 
 public final class Main {
