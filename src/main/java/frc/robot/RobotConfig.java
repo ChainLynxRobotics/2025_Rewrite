@@ -24,5 +24,22 @@ public class RobotConfig {
 
     // Conversion from motor rotations to elevator height
     public static final double kMetersPerRotation = 0;
+
+    // Elevator heights by state
+    public enum ElevatorState {
+      LOW(kBottomHeight),
+      MID(kMiddleHeight),
+      HIGH(kMaxHeight);
+
+      private double height;
+
+      ElevatorState(double height) {
+        this.height = height;
+      }
+
+      public double getHeight() {
+        return height;
+      }
+    }
   }
 }
