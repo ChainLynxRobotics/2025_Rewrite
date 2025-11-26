@@ -1,7 +1,24 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.Follower;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.hardware.TalonFX;
+
+import static edu.wpi.first.units.Units.Meters;
+import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Volts;
-import static edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction.kForward;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Voltage;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.RobotConfig.ElevatorConfig.ElevatorState;
 import static frc.robot.RobotConfig.ElevatorConfig.kA;
 import static frc.robot.RobotConfig.ElevatorConfig.kD;
 import static frc.robot.RobotConfig.ElevatorConfig.kG;
@@ -13,27 +30,7 @@ import static frc.robot.RobotConfig.ElevatorConfig.kP;
 import static frc.robot.RobotConfig.ElevatorConfig.kS;
 import static frc.robot.RobotConfig.ElevatorConfig.kV;
 
-import com.ctre.phoenix6.configs.FeedbackConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.DynamicMotionMagicVoltage;
-import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.hardware.TalonFX;
-import edu.wpi.first.math.controller.ElevatorFeedforward;
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.trajectory.TrapezoidProfile;
-import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
-import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
-
 public class ElevatorSubsystem extends SubsystemBase {
-
-  private Constraints constraints = new Constraints(kMaxVelocity, kMaxAcceleration);
-
-  private TrapezoidProfile trapezoidProfile = new TrapezoidProfile(constraints);
-
-  private PIDController pid = new PIDController(kP, kI, kD);
 
   private TalonFX leader = new TalonFX(0);
 
@@ -41,14 +38,11 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   private DutyCycleOut leaderDutyCycleOut = new DutyCycleOut(0.0);
 
-  private ElevatorFeedforward feedforward = new ElevatorFeedforward(kS, kG, kV, kA);
-
-  private DynamicMotionMagicVoltage motionMagicVoltage = new DynamicMotionMagicVoltage(0, 0, 0, 0);
-
-  private VoltageOut voltageOut = new VoltageOut(0.0);
+  private TalonFXConfiguration talonFXConfiguration = new TalonFXConfiguration();
 
   private Slot0Configs slot0Configs =
-      new Slot0Configs()
+      talonFXConfiguration
+          .Slot0
           .withKP(kP)
           .withKI(kI)
           .withKD(kD)
@@ -57,51 +51,56 @@ public class ElevatorSubsystem extends SubsystemBase {
           .withKG(kG)
           .withKS(kS);
 
-  FeedbackConfigs feedbackConfigs =
-      new FeedbackConfigs().withSensorToMechanismRatio(kMetersPerRotation);
+  private MotionMagicConfigs motionMagicConfigs =
+      talonFXConfiguration
+          .MotionMagic
+          .withMotionMagicCruiseVelocity(kMaxVelocity)
+          .withMotionMagicAcceleration(kMaxAcceleration);
 
-  private TrapezoidProfile.State currentSetpoint = new TrapezoidProfile.State();
-  private TrapezoidProfile.State goalSetpoint = new TrapezoidProfile.State();
+  private MotionMagicVoltage voltageRequest = new MotionMagicVoltage(0.0);
 
-  SysIdRoutine sysIdRoutine =
+  private VoltageOut voltageOut = new VoltageOut(0.0);
+
+  private SysIdRoutine sysIdRoutine =
       new SysIdRoutine(
           new SysIdRoutine.Config(),
           new SysIdRoutine.Mechanism(
               volts -> leader.setControl(voltageOut.withOutput(volts.in(Volts))),
               log ->
                   log.motor("Leader")
-                      .angularAcceleration(null)
-                      .angularPosition(null)
-                      .angularVelocity(null)
-                      .current(null)
-                      .linearAcceleration(null)
-                      .linearPosition(null)
-                      .linearVelocity(null)
-                      .voltage(null),
+                      .linearPosition(this.getHeight())
+                      .linearVelocity(getLinearVelocity())
+                      .voltage(getVoltage()),
               this));
 
   public ElevatorSubsystem() {
-    leader.setControl(leaderDutyCycleOut);
-    leader.getConfigurator().apply(slot0Configs);
-    leader.getConfigurator().apply(feedbackConfigs);
+    leader.getConfigurator().apply(talonFXConfiguration);
   }
 
-  @Override
-  public void periodic() {
-    currentSetpoint = trapezoidProfile.calculate(0.02, currentSetpoint, goalSetpoint);
-    leader.set(pid.calculate(getHeight(), currentSetpoint.position));
-    sysIdRoutine.dynamic(kForward);
-}
-
-  public double getHeight() {
-    return leader.getPosition().getValueAsDouble();
+  public Distance getHeight() {
+    return Meters.of(leader.getPosition().getValueAsDouble() * kMetersPerRotation);
   }
 
   public void setHeight(double height) {
-    goalSetpoint = new TrapezoidProfile.State(height, 0);
+    leader.setControl(voltageRequest.withPosition(height));
+  }
+
+  public LinearVelocity getLinearVelocity() {
+    return MetersPerSecond.of(leader.getVelocity().getValueAsDouble() * kMetersPerRotation);
+  }
+
+  public Voltage getVoltage() {
+    return leader.getMotorVoltage().getValue();
   }
 
   public void reset() {
     this.setHeight(0.0);
+  }
+
+  public Command setElevatorHeight(ElevatorState height) {
+    return run(
+        () -> {
+          setHeight(height.getHeight());
+        });
   }
 }
