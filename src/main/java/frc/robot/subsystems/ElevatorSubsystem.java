@@ -27,7 +27,6 @@ import static frc.robot.RobotConfig.ElevatorConfig.kV;
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -56,8 +55,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   private TalonFXSimState leaderSimState = leader.getSimState();
 
-  private DutyCycleOut leaderDutyCycleOut = new DutyCycleOut(0.0);
-
   private TalonFXConfiguration talonFXConfiguration = new TalonFXConfiguration();
 
   private Slot0Configs slot0Configs =
@@ -81,7 +78,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   private VoltageOut voltageOut = new VoltageOut(0.0);
 
-  private SysIdRoutine sysIdRoutine =
+  public SysIdRoutine sysIdRoutine =
       new SysIdRoutine(
           new SysIdRoutine.Config(),
           new SysIdRoutine.Mechanism(
