@@ -98,6 +98,7 @@ public class RobotContainer {
     joystick.b().onTrue(elevator.setElevatorHeight(ElevatorState.L2));
     joystick.x().onTrue(elevator.setElevatorHeight(ElevatorState.L3));
     joystick.y().onTrue(elevator.setElevatorHeight(ElevatorState.L4));
+    joystick.rightBumper().onTrue(elevator.sysIdRoutine.dynamic(Direction.kForward));
   }
 
   public Command getAutonomousCommand() {
