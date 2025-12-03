@@ -11,10 +11,12 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.RobotConfig.ElevatorConfig.ElevatorState;
 import frc.robot.generated.TunerConstants;
@@ -40,7 +42,9 @@ public class RobotContainer {
 
   private final Telemetry logger = new Telemetry(MaxSpeed);
 
-  private final CommandXboxController joystick = new CommandXboxController(0);
+  private final CommandXboxController commandXboxController = new CommandXboxController(0);
+
+  private final Joystick joystick = new Joystick(1);
 
   public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -59,11 +63,13 @@ public class RobotContainer {
             () ->
                 drive
                     .withVelocityX(
-                        -joystick.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
+                        -commandXboxController.getLeftY()
+                            * MaxSpeed) // Drive forward with negative Y (forward)
                     .withVelocityY(
-                        -joystick.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                        -commandXboxController.getLeftX()
+                            * MaxSpeed) // Drive left with negative X (left)
                     .withRotationalRate(
-                        -joystick.getRightX()
+                        -commandXboxController.getRightX()
                             * MaxAngularRate) // Drive counterclockwise with negative X (left)
             ));
 
@@ -73,32 +79,45 @@ public class RobotContainer {
     RobotModeTriggers.disabled()
         .whileTrue(drivetrain.applyRequest(() -> idle).ignoringDisable(true));
 
-    joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
-    joystick
+    commandXboxController.a().whileTrue(drivetrain.applyRequest(() -> brake));
+    commandXboxController
         .b()
         .whileTrue(
             drivetrain.applyRequest(
                 () ->
                     point.withModuleDirection(
-                        new Rotation2d(-joystick.getLeftY(), -joystick.getLeftX()))));
+                        new Rotation2d(
+                            -commandXboxController.getLeftY(),
+                            -commandXboxController.getLeftX()))));
 
     // Run SysId routines when holding back/start and X/Y.
     // Note that each routine should be run exactly once in a single log.
-    joystick.back().and(joystick.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-    joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-    joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-    joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+    commandXboxController
+        .back()
+        .and(commandXboxController.y())
+        .whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
+    commandXboxController
+        .back()
+        .and(commandXboxController.x())
+        .whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
+    commandXboxController
+        .start()
+        .and(commandXboxController.y())
+        .whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
+    commandXboxController
+        .start()
+        .and(commandXboxController.x())
+        .whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
     // reset the field-centric heading on left bumper press
-    joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+    commandXboxController
+        .leftBumper()
+        .onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
     drivetrain.registerTelemetry(logger::telemeterize);
 
-    joystick.a().onTrue(elevator.setElevatorHeight(ElevatorState.L1));
-    joystick.b().onTrue(elevator.setElevatorHeight(ElevatorState.L2));
-    joystick.x().onTrue(elevator.setElevatorHeight(ElevatorState.L3));
-    joystick.y().onTrue(elevator.setElevatorHeight(ElevatorState.L4));
-    joystick.rightBumper().onTrue(elevator.sysIdRoutine.dynamic(Direction.kForward));
+    new Trigger(() -> joystick.getRawButton(1))
+        .whileTrue(elevator.setElevatorHeight(ElevatorState.L1));
   }
 
   public Command getAutonomousCommand() {

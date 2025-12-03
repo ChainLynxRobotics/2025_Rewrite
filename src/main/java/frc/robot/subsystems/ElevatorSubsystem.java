@@ -1,5 +1,8 @@
 package frc.robot.subsystems;
 
+import org.littletonrobotics.junction.AutoLogOutput;
+import org.littletonrobotics.junction.Logger;
+
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
@@ -20,9 +23,10 @@ import static frc.robot.RobotConfig.ElevatorConfig.kMotorNumber;
 import static frc.robot.RobotConfig.ElevatorConfig.kP;
 import static frc.robot.RobotConfig.ElevatorConfig.kS;
 import static frc.robot.RobotConfig.ElevatorConfig.kSimulateGravity;
-import static frc.robot.RobotConfig.ElevatorConfig.kStandardDeviation;
 import static frc.robot.RobotConfig.ElevatorConfig.kStartingHeight;
 import static frc.robot.RobotConfig.ElevatorConfig.kV;
+
+import java.lang.System.LoggerFinder;
 
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
@@ -99,8 +103,7 @@ public class ElevatorSubsystem extends SubsystemBase {
           kMinHeight,
           kMaxHeight,
           kSimulateGravity,
-          kStartingHeight,
-          kStandardDeviation);
+          kStartingHeight);
 
   // Num motors, gearbox, weight, radius, min height, max height, simulate gravity, starting height,
   // stdev of measurement
@@ -117,6 +120,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     leaderSimState.setRawRotorPosition(
         elevatorSim.getPositionMeters() / kMetersPerRotation * kGearing);
     leaderSimState.setRotorVelocity(elevatorSim.getVelocityMetersPerSecond() * kGearing);
+    // Logger.putValue(elevatorSim.getPositionMeters)
   }
 
   public Angle angleOf(Distance distance) {
