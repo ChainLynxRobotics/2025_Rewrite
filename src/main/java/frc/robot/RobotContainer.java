@@ -18,6 +18,16 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 
 public class RobotContainer {
+    private final SwerveDrive drive;
+
+    public RobotContainer() {
+        if (Robot.isReal()) {
+            this.drive = new TalonSwerve(); // Real implementation
+        }
+        else {
+            this.drive = new MapleSimSwerve(); // Simulation implementation
+        }
+    }
   private double MaxSpeed =
       TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
   private double MaxAngularRate =
