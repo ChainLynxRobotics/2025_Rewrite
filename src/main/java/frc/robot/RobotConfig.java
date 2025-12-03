@@ -8,9 +8,9 @@ public class RobotConfig {
   public static final class ElevatorConfig {
     // Elevator measurements
     public static final Distance kL1Height = Meters.of(0.0);
-    public static final Distance kL2Height = Meters.of(0.0);
-    public static final Distance kL3Height = Meters.of(0.0);
-    public static final Distance kL4Height = Meters.of(0.0);
+    public static final Distance kL2Height = Meters.of(0.25);
+    public static final Distance kL3Height = Meters.of(0.5);
+    public static final Distance kL4Height = Meters.of(0.75);
     public static final Distance kHumanPlayerHeight = Meters.of(0.0);
     public static final Distance kL2AlgaeHeight = Meters.of(0.0);
     public static final Distance kL3AlgaeHeight = Meters.of(0.0);
@@ -26,21 +26,21 @@ public class RobotConfig {
 
     // PID constants
     public static final double kP = 0.1;
-    public static final double kI = 0.0;
-    public static final double kD = 0.0;
+    public static final double kI = 1.0;
+    public static final double kD = 1.0;
 
     // Feedforward constants
     public static final double kS = 0.0;
     public static final double kG = 0.0;
-    public static final double kV = 0.0;
-    public static final double kA = 0.0;
+    public static final double kV = 10.0;
+    public static final double kA = 10.0;
 
     // Trapezoid profile constraints constants
     public static final double kMaxVelocity = 1.0;
     public static final double kMaxAcceleration = 0.5;
 
     // Conversion from motor rotations to elevator height
-    public static final double kMetersPerRotation = 0.0;
+    public static final double kMetersPerRotation = 1.0;
 
     // Elevator heights by state
     public enum ElevatorState {
