@@ -44,7 +44,7 @@ public class RobotContainer {
 
   private final CommandXboxController commandXboxController = new CommandXboxController(0);
 
-  private final Joystick joystick = new Joystick(1);
+  private final Joystick joystick = new Joystick(0);
 
   public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -117,7 +117,18 @@ public class RobotContainer {
     drivetrain.registerTelemetry(logger::telemeterize);
 
     new Trigger(() -> joystick.getRawButton(1))
-        .whileTrue(elevator.setElevatorHeight(ElevatorState.L1));
+        .whileTrue(elevator.sysIdDynamic(Direction.kForward));
+    // new Trigger(() -> joystick.getRawButton(1))
+    //  .whileTrue(elevator.setElevatorHeight(ElevatorState.L1));
+
+    new Trigger(() -> joystick.getRawButton(2))
+        .whileTrue(elevator.setElevatorHeight(ElevatorState.L2));
+
+    new Trigger(() -> joystick.getRawButton(3))
+        .whileTrue(elevator.setElevatorHeight(ElevatorState.L3));
+
+    new Trigger(() -> joystick.getRawButton(4))
+        .whileTrue(elevator.setElevatorHeight(ElevatorState.L4));
   }
 
   public Command getAutonomousCommand() {
