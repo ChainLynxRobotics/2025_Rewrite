@@ -1,8 +1,5 @@
 package frc.robot.subsystems;
 
-import org.littletonrobotics.junction.AutoLogOutput;
-import org.littletonrobotics.junction.Logger;
-
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
@@ -26,8 +23,6 @@ import static frc.robot.RobotConfig.ElevatorConfig.kSimulateGravity;
 import static frc.robot.RobotConfig.ElevatorConfig.kStartingHeight;
 import static frc.robot.RobotConfig.ElevatorConfig.kV;
 
-import java.lang.System.LoggerFinder;
-
 import com.ctre.phoenix6.configs.MotionMagicConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
@@ -45,7 +40,9 @@ import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.RobotConfig.ElevatorConfig.ElevatorState;
+import org.littletonrobotics.junction.Logger;
 
 public class ElevatorSubsystem extends SubsystemBase {
   // ElevatorSim
@@ -113,6 +110,9 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   @Override
+  public void periodic() {}
+
+  @Override
   public void simulationPeriodic() {
     leaderSimState.setSupplyVoltage(Volts.of(12.0));
     elevatorSim.setInputVoltage(leaderSimState.getMotorVoltage());
@@ -120,9 +120,19 @@ public class ElevatorSubsystem extends SubsystemBase {
     leaderSimState.setRawRotorPosition(
         elevatorSim.getPositionMeters() / kMetersPerRotation * kGearing);
     leaderSimState.setRotorVelocity(elevatorSim.getVelocityMetersPerSecond() * kGearing);
-    // Logger.putValue(elevatorSim.getPositionMeters)
+
+    Logger.recordOutput("Elevator Position", getHeight());
+    Logger.recordOutput("Elevator Velocity", elevatorSim.getVelocityMetersPerSecond());
   }
 
+  public Command sysIdDynamic(Direction direction){
+    return sysIdRoutine.dynamic(direction);
+  }
+
+  public Command sysIdQuasistatic(Direction direction){
+    return sysIdRoutine.dynamic(direction);
+  }
+  
   public Angle angleOf(Distance distance) {
     return Rotations.of(distance.in(Meters) / kMetersPerRotation);
   }
@@ -155,6 +165,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     return run(
         () -> {
           setHeight(height.getHeight());
+          Logger.recordOutput("Elevator Goal Height", height.getHeight());
         });
   }
 }
