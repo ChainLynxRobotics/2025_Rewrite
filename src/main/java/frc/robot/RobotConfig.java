@@ -25,22 +25,22 @@ public class RobotConfig {
     public static final double kStandardDeviation = 0.0;
 
     // PID constants
-    public static final double kP = 0.1;
-    public static final double kI = 1.0;
-    public static final double kD = 1.0;
+    public static final double kP = 0.2;
+    public static final double kI = 0.025;
+    public static final double kD = 0.05;
 
     // Feedforward constants
     public static final double kS = 0.0;
     public static final double kG = 0.0;
-    public static final double kV = 10.0;
-    public static final double kA = 10.0;
+    public static final double kV = 0.0;
+    public static final double kA = 0.0;
 
     // Trapezoid profile constraints constants
     public static final double kMaxVelocity = 1.0;
     public static final double kMaxAcceleration = 0.5;
 
     // Conversion from motor rotations to elevator height
-    public static final double kMetersPerRotation = 1.0;
+    public static final double kMetersPerRotation = 0.17907078125;
 
     // Elevator heights by state
     public enum ElevatorState {
