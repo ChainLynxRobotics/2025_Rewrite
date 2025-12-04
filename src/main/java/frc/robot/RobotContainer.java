@@ -116,19 +116,24 @@ public class RobotContainer {
 
     drivetrain.registerTelemetry(logger::telemeterize);
 
+    /*new Trigger(() -> joystick.getRawButton(1))
+    .whileTrue(
+        elevator
+            .sysIdDynamic(Direction.kForward)
+            .andThen(elevator.sysIdDynamic(Direction.kReverse))
+            .andThen(elevator.sysIdQuasistatic(Direction.kForward))
+            .andThen(elevator.sysIdQuasistatic(Direction.kReverse)));*/
     new Trigger(() -> joystick.getRawButton(1))
-        .whileTrue(elevator.sysIdDynamic(Direction.kForward));
-    // new Trigger(() -> joystick.getRawButton(1))
-    //  .whileTrue(elevator.setElevatorHeight(ElevatorState.L1));
+        .onTrue(elevator.setElevatorHeight(ElevatorState.L1));
 
     new Trigger(() -> joystick.getRawButton(2))
-        .whileTrue(elevator.setElevatorHeight(ElevatorState.L2));
+        .onTrue(elevator.setElevatorHeight(ElevatorState.L2));
 
     new Trigger(() -> joystick.getRawButton(3))
-        .whileTrue(elevator.setElevatorHeight(ElevatorState.L3));
+        .onTrue(elevator.setElevatorHeight(ElevatorState.L3));
 
     new Trigger(() -> joystick.getRawButton(4))
-        .whileTrue(elevator.setElevatorHeight(ElevatorState.L4));
+        .onTrue(elevator.setElevatorHeight(ElevatorState.L4));
   }
 
   public Command getAutonomousCommand() {
