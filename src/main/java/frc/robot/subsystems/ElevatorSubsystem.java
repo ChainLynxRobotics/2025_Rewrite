@@ -59,8 +59,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   private TalonFXConfiguration talonFXConfiguration = new TalonFXConfiguration();
 
   private Slot0Configs slot0Configs =
-      talonFXConfiguration
-          .Slot0
+      new Slot0Configs()
           .withKP(kP)
           .withKI(kI)
           .withKD(kD)
@@ -70,8 +69,7 @@ public class ElevatorSubsystem extends SubsystemBase {
           .withKS(kS);
 
   private MotionMagicConfigs motionMagicConfigs =
-      talonFXConfiguration
-          .MotionMagic
+      new MotionMagicConfigs()
           .withMotionMagicCruiseVelocity(kMaxVelocity)
           .withMotionMagicAcceleration(kMaxAcceleration);
 
@@ -105,6 +103,8 @@ public class ElevatorSubsystem extends SubsystemBase {
   // Num motors, gearbox, weight, radius, min height, max height, simulate gravity, starting height,
   // stdev of measurement
   public ElevatorSubsystem() {
+    talonFXConfiguration.Slot0 = slot0Configs;
+    talonFXConfiguration.MotionMagic = motionMagicConfigs;
     leader.getConfigurator().apply(talonFXConfiguration);
     follower.setControl(followerBase);
   }
@@ -125,14 +125,14 @@ public class ElevatorSubsystem extends SubsystemBase {
     Logger.recordOutput("Elevator Velocity", elevatorSim.getVelocityMetersPerSecond());
   }
 
-  public Command sysIdDynamic(Direction direction){
+  public Command sysIdDynamic(Direction direction) {
     return sysIdRoutine.dynamic(direction);
   }
 
-  public Command sysIdQuasistatic(Direction direction){
+  public Command sysIdQuasistatic(Direction direction) {
     return sysIdRoutine.dynamic(direction);
   }
-  
+
   public Angle angleOf(Distance distance) {
     return Rotations.of(distance.in(Meters) / kMetersPerRotation);
   }
