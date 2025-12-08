@@ -47,35 +47,15 @@ public class Constants {
     public static final double kV = 0.3375;
     public static final double kA = 0.035;
 
+    public static final double kT = 0.02;
+
     // Trapezoid profile constraints constants (rotations per second)
-    public static final AngularVelocity kMaxVelocity = RotationsPerSecond.of(0.5);
-    public static final AngularAcceleration kMaxAcceleration = RotationsPerSecondPerSecond.of(0.5);
+    public static final AngularVelocity kMaxVelocity = RotationsPerSecond.of(1.0);
+    public static final AngularAcceleration kMaxAcceleration = RotationsPerSecondPerSecond.of(1.0);
 
     // Conversion from motor rotations to elevator height
     public static final double kMetersPerRotation =
         (kMaxHeight).in(Meters) / kFullExtensionAngle.in(Rotations);
-
-    // Elevator heights by state
-    public enum ElevatorState {
-      BOTTOM(kMinHeight),
-      L1(kL1Height),
-      L2(kL2Height),
-      L3(kL3Height),
-      L4(kL4Height),
-      HUMANPLAYER(kHumanPlayerHeight),
-      L2ALGAE(kL2AlgaeHeight),
-      L3ALGAE(kL3AlgaeHeight);
-
-      public final Distance height;
-
-      ElevatorState(Distance height) {
-        this.height = height;
-      }
-
-      public Distance getHeight() {
-        return height;
-      }
-    }
 
     public static final ElevatorSim elevatorSim =
         new ElevatorSim(
@@ -104,5 +84,27 @@ public class Constants {
         new MotionMagicConfigs()
             .withMotionMagicCruiseVelocity(kMaxVelocity)
             .withMotionMagicAcceleration(kMaxAcceleration);
+
+    // Elevator heights by state
+    public enum ElevatorState {
+      BOTTOM(kMinHeight),
+      L1(kL1Height),
+      L2(kL2Height),
+      L3(kL3Height),
+      L4(kL4Height),
+      HUMANPLAYER(kHumanPlayerHeight),
+      L2ALGAE(kL2AlgaeHeight),
+      L3ALGAE(kL3AlgaeHeight);
+
+      public final Distance height;
+
+      ElevatorState(Distance height) {
+        this.height = height;
+      }
+
+      public Distance getHeight() {
+        return height;
+      }
+    }
   }
 }

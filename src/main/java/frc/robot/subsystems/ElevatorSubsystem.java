@@ -7,11 +7,12 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.RobotConfig.ElevatorConfig.elevatorSim;
-import static frc.robot.RobotConfig.ElevatorConfig.kMetersPerRotation;
-import static frc.robot.RobotConfig.ElevatorConfig.motionMagicConfigs;
-import static frc.robot.RobotConfig.ElevatorConfig.slot0Configs;
-import static frc.robot.RobotConfig.ElevatorConfig.talonFXConfiguration;
+import static frc.robot.Constants.ElevatorConfig.elevatorSim;
+import static frc.robot.Constants.ElevatorConfig.kMetersPerRotation;
+import static frc.robot.Constants.ElevatorConfig.kT;
+import static frc.robot.Constants.ElevatorConfig.motionMagicConfigs;
+import static frc.robot.Constants.ElevatorConfig.slot0Configs;
+import static frc.robot.Constants.ElevatorConfig.talonFXConfiguration;
 
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -29,7 +30,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.RobotConfig.ElevatorConfig.ElevatorState;
+import frc.robot.Constants.ElevatorConfig.ElevatorState;
 
 @Logged
 public class ElevatorSubsystem extends SubsystemBase {
@@ -76,7 +77,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void simulationPeriodic() {
     leaderSimState.setSupplyVoltage(Volts.of(12.0));
     elevatorSim.setInputVoltage(leaderSimState.getMotorVoltage());
-    elevatorSim.update(0.02);
+    elevatorSim.update(kT);
     leaderSimState.setRawRotorPosition(
         angleFromHeightOf(Meters.of(elevatorSim.getPositionMeters())));
     leaderSimState.setRotorVelocity(

@@ -19,7 +19,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.RobotConfig.ElevatorConfig.ElevatorState;
+import frc.robot.Constants.ElevatorConfig.ElevatorState;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -119,16 +119,16 @@ public class RobotContainer {
     drivetrain.registerTelemetry(logger::telemeterize);
 
     new Trigger(() -> joystick.getRawButton(1))
-        .onTrue(elevator.setElevatorHeight(ElevatorState.L1));
+        .onTrue(elevator.setElevatorHeight(ElevatorState.BOTTOM));
 
     new Trigger(() -> joystick.getRawButton(2))
-        .onTrue(elevator.setElevatorHeight(ElevatorState.L2));
+        .onTrue(elevator.setElevatorHeight(ElevatorState.L1));
 
     new Trigger(() -> joystick.getRawButton(3))
-        .onTrue(elevator.setElevatorHeight(ElevatorState.L3));
+        .onTrue(elevator.setElevatorHeight(ElevatorState.L2));
 
     new Trigger(() -> joystick.getRawButton(4))
-        .onTrue(elevator.setElevatorHeight(ElevatorState.L4));
+        .onTrue(elevator.setElevatorHeight(ElevatorState.L3));
   }
 
   public Command getAutonomousCommand() {
