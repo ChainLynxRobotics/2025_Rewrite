@@ -10,6 +10,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -23,6 +24,7 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.ElevatorSubsystem;
 
+@Logged
 public class RobotContainer {
   private double MaxSpeed =
       TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -44,7 +46,7 @@ public class RobotContainer {
 
   private final CommandXboxController commandXboxController = new CommandXboxController(0);
 
-  private final Joystick joystick = new Joystick(0);
+  private final Joystick joystick = new Joystick(1);
 
   public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -116,13 +118,6 @@ public class RobotContainer {
 
     drivetrain.registerTelemetry(logger::telemeterize);
 
-    /*new Trigger(() -> joystick.getRawButton(1))
-    .whileTrue(
-        elevator
-            .sysIdDynamic(Direction.kForward)
-            .andThen(elevator.sysIdDynamic(Direction.kReverse))
-            .andThen(elevator.sysIdQuasistatic(Direction.kForward))
-            .andThen(elevator.sysIdQuasistatic(Direction.kReverse)));*/
     new Trigger(() -> joystick.getRawButton(1))
         .onTrue(elevator.setElevatorHeight(ElevatorState.L1));
 
