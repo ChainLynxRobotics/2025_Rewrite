@@ -7,17 +7,14 @@ package frc.robot;
 import edu.wpi.first.epilogue.Epilogue;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.Logged.Importance;
-import edu.wpi.first.epilogue.logging.FileBackend;
 import edu.wpi.first.epilogue.logging.errors.ErrorHandler;
 import edu.wpi.first.wpilibj.DataLogManager;
+import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import org.littletonrobotics.junction.LoggedRobot;
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.NT4Publisher;
-import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
-public class Robot extends LoggedRobot {
+@Logged
+public class Robot extends TimedRobot {
 
   private Command m_autonomousCommand;
 
@@ -27,10 +24,6 @@ public class Robot extends LoggedRobot {
   private final RobotContainer m_robotContainer;
 
   public Robot() {
-    Logger.addDataReceiver(new WPILOGWriter("./logs"));
-    Logger.addDataReceiver(new NT4Publisher());
-
-    Logger.start();
 
     m_robotContainer = new RobotContainer();
 
@@ -41,7 +34,9 @@ public class Robot extends LoggedRobot {
         config -> {
           // Log only to disk, instead of the default NetworkTables logging
           // Note that this means data cannot be analyzed in realtime by a dashboard
-          config.backend = new FileBackend(DataLogManager.getLog());
+          config.minimumImportance = Importance.DEBUG;
+
+          // config.backend = new FileBackend(DataLogManager.getLog());
 
           if (isSimulation()) {
             // If running in simulation, then we'd want to re-throw any errors that
@@ -52,6 +47,8 @@ public class Robot extends LoggedRobot {
           // Change the root data path
           config.root = "Telemetry";
         });
+
+    Epilogue.bind(this);
   }
 
   @Override
