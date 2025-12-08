@@ -7,28 +7,12 @@ import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
-import static frc.robot.RobotConfig.ElevatorConfig.kA;
-import static frc.robot.RobotConfig.ElevatorConfig.kCarriageMass;
-import static frc.robot.RobotConfig.ElevatorConfig.kD;
-import static frc.robot.RobotConfig.ElevatorConfig.kDrumRadius;
-import static frc.robot.RobotConfig.ElevatorConfig.kG;
-import static frc.robot.RobotConfig.ElevatorConfig.kGearing;
-import static frc.robot.RobotConfig.ElevatorConfig.kI;
-import static frc.robot.RobotConfig.ElevatorConfig.kMaxAcceleration;
-import static frc.robot.RobotConfig.ElevatorConfig.kMaxHeight;
-import static frc.robot.RobotConfig.ElevatorConfig.kMaxVelocity;
+import static frc.robot.RobotConfig.ElevatorConfig.elevatorSim;
 import static frc.robot.RobotConfig.ElevatorConfig.kMetersPerRotation;
-import static frc.robot.RobotConfig.ElevatorConfig.kMinHeight;
-import static frc.robot.RobotConfig.ElevatorConfig.kMotorNumber;
-import static frc.robot.RobotConfig.ElevatorConfig.kP;
-import static frc.robot.RobotConfig.ElevatorConfig.kS;
-import static frc.robot.RobotConfig.ElevatorConfig.kSimulateGravity;
-import static frc.robot.RobotConfig.ElevatorConfig.kStartingHeight;
-import static frc.robot.RobotConfig.ElevatorConfig.kV;
+import static frc.robot.RobotConfig.ElevatorConfig.motionMagicConfigs;
+import static frc.robot.RobotConfig.ElevatorConfig.slot0Configs;
+import static frc.robot.RobotConfig.ElevatorConfig.talonFXConfiguration;
 
-import com.ctre.phoenix6.configs.MotionMagicConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
@@ -36,13 +20,11 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.epilogue.Logged.Importance;
-import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
@@ -51,10 +33,8 @@ import frc.robot.RobotConfig.ElevatorConfig.ElevatorState;
 
 @Logged
 public class ElevatorSubsystem extends SubsystemBase {
-  // ElevatorSim
-  // TalonFX sim state
-  // Call iterate
-  private Distance goalHeight = Meters.of(0.0);
+
+  private Distance goalHeight = Meters.of(0.0); // For logging purposes
 
   private TalonFX leader = new TalonFX(13);
 
@@ -63,23 +43,6 @@ public class ElevatorSubsystem extends SubsystemBase {
   private Follower followerBase = new Follower(13, true);
 
   private TalonFXSimState leaderSimState = leader.getSimState();
-
-  private TalonFXConfiguration talonFXConfiguration = new TalonFXConfiguration();
-
-  private Slot0Configs slot0Configs =
-      new Slot0Configs()
-          .withKP(kP)
-          .withKI(kI)
-          .withKD(kD)
-          .withKV(kV)
-          .withKA(kA)
-          .withKG(kG)
-          .withKS(kS);
-
-  private MotionMagicConfigs motionMagicConfigs =
-      new MotionMagicConfigs()
-          .withMotionMagicCruiseVelocity(kMaxVelocity)
-          .withMotionMagicAcceleration(kMaxAcceleration);
 
   private MotionMagicVoltage voltageRequest = new MotionMagicVoltage(0.0);
 
@@ -96,17 +59,6 @@ public class ElevatorSubsystem extends SubsystemBase {
                       .linearVelocity(getLinearVelocity())
                       .voltage(getVoltage()),
               this));
-
-  ElevatorSim elevatorSim =
-      new ElevatorSim(
-          DCMotor.getKrakenX60(kMotorNumber),
-          kGearing,
-          kCarriageMass,
-          kDrumRadius,
-          kMinHeight,
-          kMaxHeight.in(Meters),
-          kSimulateGravity,
-          kStartingHeight);
 
   // Num motors, gearbox, weight, radius, min height, max height, simulate gravity, starting height,
   // stdev of measurement
