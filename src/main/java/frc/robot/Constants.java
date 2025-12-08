@@ -12,7 +12,7 @@ import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
 
-public class RobotConfig {
+public class Constants {
   public static final class ElevatorConfig {
     // Elevator measurements
     public static final Distance kL1Height = Millimeters.of(185.42);
