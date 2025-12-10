@@ -118,6 +118,14 @@ public class RobotContainer {
 
     drivetrain.registerTelemetry(logger::telemeterize);
 
+    commandXboxController.x().onTrue(elevator.runSysId());
+
+    commandXboxController.y().onTrue(elevator.setElevatorHeight(ElevatorState.L1));
+
+    commandXboxController.a().onTrue(elevator.setElevatorHeight(ElevatorState.L2));
+
+    commandXboxController.b().onTrue(elevator.setElevatorHeight(ElevatorState.L3));
+
     new Trigger(() -> joystick.getRawButton(1))
         .onTrue(elevator.setElevatorHeight(ElevatorState.BOTTOM));
 

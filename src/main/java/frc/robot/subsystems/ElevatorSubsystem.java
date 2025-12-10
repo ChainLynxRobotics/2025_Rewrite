@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.Meters;
 import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
-import static edu.wpi.first.units.Units.RadiansPerSecond;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
 import static edu.wpi.first.units.Units.Volts;
@@ -11,6 +10,9 @@ import static frc.robot.Constants.ElevatorConfig.elevatorSim;
 import static frc.robot.Constants.ElevatorConfig.kMetersPerRotation;
 import static frc.robot.Constants.ElevatorConfig.kT;
 import static frc.robot.Constants.ElevatorConfig.motionMagicConfigs;
+import static frc.robot.Constants.ElevatorConfig.simMotionMagicConfigs;
+import static frc.robot.Constants.ElevatorConfig.simSlot0Configs;
+import static frc.robot.Constants.ElevatorConfig.simTalonFXConfiguration;
 import static frc.robot.Constants.ElevatorConfig.slot0Configs;
 import static frc.robot.Constants.ElevatorConfig.talonFXConfiguration;
 
@@ -31,6 +33,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Constants.ElevatorConfig.ElevatorState;
+import frc.robot.Robot;
 
 @Logged
 public class ElevatorSubsystem extends SubsystemBase {
@@ -64,14 +67,25 @@ public class ElevatorSubsystem extends SubsystemBase {
   // Num motors, gearbox, weight, radius, min height, max height, simulate gravity, starting height,
   // stdev of measurement
   public ElevatorSubsystem() {
-    talonFXConfiguration.Slot0 = slot0Configs;
-    talonFXConfiguration.MotionMagic = motionMagicConfigs;
-    leader.getConfigurator().apply(talonFXConfiguration);
-    follower.setControl(followerBase);
+    if (Robot.isReal()) {
+      talonFXConfiguration.Slot0 = slot0Configs;
+      talonFXConfiguration.MotionMagic = motionMagicConfigs;
+      leader.getConfigurator().apply(talonFXConfiguration);
+      follower.setControl(followerBase);
+    } else if (Robot.isSimulation()) {
+      simTalonFXConfiguration.Slot0 = simSlot0Configs;
+      simTalonFXConfiguration.MotionMagic = simMotionMagicConfigs;
+      leader.getConfigurator().apply(simTalonFXConfiguration);
+      follower.setControl(followerBase);
+    }
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    if (getHeight().gte(Meters.of(1.55))) {
+      leader.stopMotor();
+    }
+  }
 
   @Override
   public void simulationPeriodic() {
@@ -81,16 +95,18 @@ public class ElevatorSubsystem extends SubsystemBase {
     leaderSimState.setRawRotorPosition(
         angleFromHeightOf(Meters.of(elevatorSim.getPositionMeters())));
     leaderSimState.setRotorVelocity(
-        RadiansPerSecond.of(
+        RotationsPerSecond.of(
             angleFromHeightOf(Meters.of(elevatorSim.getVelocityMetersPerSecond())).in(Radians)));
   }
 
-  public Command sysIdDynamic(Direction direction) {
-    return sysIdRoutine.dynamic(direction);
-  }
-
-  public Command sysIdQuasistatic(Direction direction) {
-    return sysIdRoutine.quasistatic(direction);
+  @Logged
+  public Command runSysId() {
+    return sysIdRoutine
+        .dynamic(Direction.kForward)
+        .andThen(sysIdRoutine.dynamic(Direction.kReverse))
+        .withTimeout(2.5)
+        .andThen(sysIdRoutine.quasistatic(Direction.kReverse))
+        .andThen(sysIdRoutine.quasistatic(Direction.kReverse));
   }
 
   public Angle angleFromHeightOf(Distance distance) {
