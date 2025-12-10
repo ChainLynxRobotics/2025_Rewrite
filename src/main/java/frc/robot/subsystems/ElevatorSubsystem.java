@@ -37,9 +37,9 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   private Distance goalHeight = Meters.of(0.0); // For logging purposes
 
-  private TalonFX leader = new TalonFX(13);
+  private TalonFX leader = new TalonFX(14);
 
-  private TalonFX follower = new TalonFX(14);
+  private TalonFX follower = new TalonFX(15);
 
   private Follower followerBase = new Follower(13, true);
 
