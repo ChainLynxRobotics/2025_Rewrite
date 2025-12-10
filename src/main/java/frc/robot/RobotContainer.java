@@ -49,7 +49,7 @@ public class RobotContainer {
 
   private final Joystick elevatorSimJoystick = new Joystick(1);
 
-  private final CommandXboxController elevatorCommandXboxController = new CommandXboxController(0);
+  private final CommandXboxController elevatorCommandXboxController = new CommandXboxController(2);
 
   public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
