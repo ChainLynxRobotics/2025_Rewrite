@@ -75,7 +75,11 @@ public class Vision extends SubsystemBase{
             List<PhotonPipelineResult> data = cameraRecord.camera.getAllUnreadResults();
 
             for (PhotonPipelineResult result: data) {
-                EstimatedRobotPose poseResult = cameraRecord.estimator.update(result).get();
+                Optional<EstimatedRobotPose> optionalPoseResult = cameraRecord.estimator.update(result);
+                if (optionalPoseResult.isEmpty()) {
+                    continue;
+                }
+                EstimatedRobotPose poseResult = optionalPoseResult.get();
                 if (checkTolerance(poseResult)) {
                     updateDrivetrain.accept(poseResult);
                 }
