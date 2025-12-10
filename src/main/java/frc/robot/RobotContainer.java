@@ -123,11 +123,11 @@ public class RobotContainer {
 
     elevatorCommandXboxController.x().onTrue(elevator.runSysId().andThen(new PrintCommand("SysId Complete")));
 
-    elevatorCommandXboxController.y().onTrue(elevator.setElevatorHeight(ElevatorState.L1));
+    elevatorCommandXboxController.y().onTrue(elevator.setElevatorHeight(ElevatorState.L1).andThen(new PrintCommand("L1 Set")));
 
-    elevatorCommandXboxController.a().onTrue(elevator.setElevatorHeight(ElevatorState.L2));
+    elevatorCommandXboxController.a().onTrue(elevator.setElevatorHeight(ElevatorState.L2).andThen(new PrintCommand("L2 Set")));
 
-    elevatorCommandXboxController.b().onTrue(elevator.setElevatorHeight(ElevatorState.L3));
+    elevatorCommandXboxController.b().onTrue(elevator.setElevatorHeight(ElevatorState.L3).andThen(new PrintCommand("L3 Set")));
 
     new Trigger(() -> elevatorSimJoystick.getRawButton(1))
         .onTrue(elevator.setElevatorHeight(ElevatorState.BOTTOM));
