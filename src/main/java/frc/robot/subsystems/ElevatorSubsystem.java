@@ -44,7 +44,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   private TalonFX follower = new TalonFX(15);
 
-  private Follower followerBase = new Follower(13, true);
+  private Follower followerBase = new Follower(14, true);
 
   private TalonFXSimState leaderSimState = leader.getSimState();
 
