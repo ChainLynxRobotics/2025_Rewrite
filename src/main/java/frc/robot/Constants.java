@@ -18,7 +18,7 @@ public class Constants {
     public static final Distance kL1Height = Millimeters.of(185.42);
     public static final Distance kL2Height = Millimeters.of(337.82);
     public static final Distance kL3Height = Millimeters.of(711.2);
-    public static final Distance kL4Height = Millimeters.of(1546.86);
+    public static final Distance kL4Height = Millimeters.of(1546.86); // 1546
     public static final Distance kHumanPlayerHeight = Millimeters.of(431.8);
     public static final Distance kL2AlgaeHeight = Millimeters.of(355.6);
     public static final Distance kL3AlgaeHeight = Millimeters.of(889);
@@ -36,6 +36,11 @@ public class Constants {
     public static final Angle kFullExtensionAngle =
         Radians.of(kMaxHeight.div(kPullyRadius).magnitude());
 
+    public static final double kT = 0.02;
+
+    // ...........................................................................................//
+    // ...........................................................................................//
+
     // PID constants
     public static final double kP = 6;
     public static final double kI = 0.0;
@@ -47,11 +52,31 @@ public class Constants {
     public static final double kV = 0.3375;
     public static final double kA = 0.035;
 
-    public static final double kT = 0.02;
-
     // Trapezoid profile constraints constants (rotations per second)
     public static final AngularVelocity kMaxVelocity = RotationsPerSecond.of(1.0);
     public static final AngularAcceleration kMaxAcceleration = RotationsPerSecondPerSecond.of(1.0);
+
+    // ...........................................................................................//
+    // ...........................................................................................//
+
+    // Sim PID constants
+    public static final double kSimP = 6;
+    public static final double kSimI = 0.0;
+    public static final double kSimD = 0.0;
+
+    // Sim Feedforward constants
+    public static final double kSimS = 0.0;
+    public static final double kSimG = 2.13037;
+    public static final double kSimV = 0.3375;
+    public static final double kSimA = 0.035;
+
+    // Sim Trapezoid profile constraints constants (rotations per second)
+    public static final AngularVelocity kSimMaxVelocity = RotationsPerSecond.of(1.0);
+    public static final AngularAcceleration kSimMaxAcceleration =
+        RotationsPerSecondPerSecond.of(1.0);
+
+    // ...........................................................................................//
+    // ...........................................................................................//
 
     // Conversion from motor rotations to elevator height
     public static final double kMetersPerRotation =
@@ -67,6 +92,9 @@ public class Constants {
             kMaxHeight.in(Millimeters),
             kSimulateGravity,
             kStartingHeight);
+
+    // ...........................................................................................//
+    // ...........................................................................................//
 
     public static final TalonFXConfiguration talonFXConfiguration = new TalonFXConfiguration();
 
@@ -84,6 +112,29 @@ public class Constants {
         new MotionMagicConfigs()
             .withMotionMagicCruiseVelocity(kMaxVelocity)
             .withMotionMagicAcceleration(kMaxAcceleration);
+
+    // ...........................................................................................//
+    // ...........................................................................................//
+
+    public static final TalonFXConfiguration simTalonFXConfiguration = new TalonFXConfiguration();
+
+    public static final Slot0Configs simSlot0Configs =
+        new Slot0Configs()
+            .withKP(kSimP)
+            .withKI(kSimI)
+            .withKD(kSimD)
+            .withKV(kSimV)
+            .withKA(kSimA)
+            .withKG(kSimG)
+            .withKS(kSimS);
+
+    public static final MotionMagicConfigs simMotionMagicConfigs =
+        new MotionMagicConfigs()
+            .withMotionMagicCruiseVelocity(kSimMaxVelocity)
+            .withMotionMagicAcceleration(kSimMaxAcceleration);
+
+    // ...........................................................................................//
+    // ...........................................................................................//
 
     // Elevator heights by state
     public enum ElevatorState {
