@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.PrintCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -46,7 +47,9 @@ public class RobotContainer {
 
   private final CommandXboxController commandXboxController = new CommandXboxController(0);
 
-  private final Joystick joystick = new Joystick(1);
+  private final Joystick elevatorSimJoystick = new Joystick(1);
+
+  private final CommandXboxController elevatorCommandXboxController = new CommandXboxController(0);
 
   public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -118,24 +121,24 @@ public class RobotContainer {
 
     drivetrain.registerTelemetry(logger::telemeterize);
 
-    commandXboxController.x().onTrue(elevator.runSysId());
+    elevatorCommandXboxController.x().onTrue(elevator.runSysId().andThen(new PrintCommand("SysId Complete")));
 
-    commandXboxController.y().onTrue(elevator.setElevatorHeight(ElevatorState.L1));
+    elevatorCommandXboxController.y().onTrue(elevator.setElevatorHeight(ElevatorState.L1));
 
-    commandXboxController.a().onTrue(elevator.setElevatorHeight(ElevatorState.L2));
+    elevatorCommandXboxController.a().onTrue(elevator.setElevatorHeight(ElevatorState.L2));
 
-    commandXboxController.b().onTrue(elevator.setElevatorHeight(ElevatorState.L3));
+    elevatorCommandXboxController.b().onTrue(elevator.setElevatorHeight(ElevatorState.L3));
 
-    new Trigger(() -> joystick.getRawButton(1))
+    new Trigger(() -> elevatorSimJoystick.getRawButton(1))
         .onTrue(elevator.setElevatorHeight(ElevatorState.BOTTOM));
 
-    new Trigger(() -> joystick.getRawButton(2))
+    new Trigger(() -> elevatorSimJoystick.getRawButton(2))
         .onTrue(elevator.setElevatorHeight(ElevatorState.L1));
 
-    new Trigger(() -> joystick.getRawButton(3))
+    new Trigger(() -> elevatorSimJoystick.getRawButton(3))
         .onTrue(elevator.setElevatorHeight(ElevatorState.L2));
 
-    new Trigger(() -> joystick.getRawButton(4))
+    new Trigger(() -> elevatorSimJoystick.getRawButton(4))
         .onTrue(elevator.setElevatorHeight(ElevatorState.L3));
   }
 
