@@ -52,7 +52,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   private VoltageOut voltageOut = new VoltageOut(0.0);
 
-  public SysIdRoutine sysIdRoutine =
+  private SysIdRoutine sysIdRoutine =
       new SysIdRoutine(
           new SysIdRoutine.Config(),
           new SysIdRoutine.Mechanism(
