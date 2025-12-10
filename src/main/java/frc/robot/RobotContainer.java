@@ -5,6 +5,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.ManipulatorConstants.stateToAngle;
 
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
@@ -18,6 +19,10 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Manipulator;
+import frc.robot.subsystems.ManipulatorConstants;
+
+
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -34,7 +39,11 @@ public class RobotContainer {
 
     private final CommandXboxController joystick = new CommandXboxController(0);
 
+    private final CommandXboxController operatorController = new CommandXboxController(1);
+
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+
+    public final Manipulator manipulator = new Manipulator();
 
     public RobotContainer() {
         configureBindings();
@@ -75,6 +84,10 @@ public class RobotContainer {
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        operatorController.a().onTrue(manipulator.moveToAngle(ManipulatorConstants.ManipulatorPosition.L1_SCORE));
+        operatorController.b().onTrue(manipulator.moveToAngle(ManipulatorConstants.ManipulatorPosition.L2_SCORE));
+        operatorController.y().onTrue(manipulator.moveToAngle(ManipulatorConstants.ManipulatorPosition.L4_SCORE));
     }
 
     public Command getAutonomousCommand() {

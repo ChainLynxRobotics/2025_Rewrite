@@ -5,6 +5,8 @@ import com.revrobotics.spark.SparkBase.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.ManipulatorConstants.ManipulatorPosition;
+import static frc.robot.subsystems.ManipulatorConstants.kVelocity;
 
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
@@ -14,12 +16,15 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 
 public class Manipulator extends SubsystemBase {
+
+  
 
   final SparkMax rotationalMotor =
     new SparkMax(ManipulatorConstants.kRotationalMotor, MotorType.kBrushless);
@@ -51,7 +56,7 @@ public class Manipulator extends SubsystemBase {
 
   public Angle targetRotation = Rotation.of(0); 
 
-  public LinearVelocity targetVelocity = MetersPerSecond.of(0);
+  public AngularVelocity targetVelocity = RotationsPerSecond.of(0);
 
   public Manipulator() {
     motorConfig
@@ -138,17 +143,32 @@ public class Manipulator extends SubsystemBase {
 
   public void reset() {
     setGoalRot(Rotations.of(0));
-    setGoalSide(Rotations.of(0));
+    setGoalSide(RotationsPerSecond.of(0));
   }
 
-  protected void setGoalRot(Angle rotation) {
+  public void setGoalRot(Angle rotation) {
     goalSetpointRot = new TrapezoidProfile.State(rotation.baseUnitMagnitude(), 0);
     targetRotation = rotation;
   }
 
-  protected void setGoalSide(Angle rotation) {
-    goalSetpointSide = new TrapezoidProfile.State(rotation.baseUnitMagnitude(), 0);
-    targetRotation = rotation;
+  protected void setGoalSide(AngularVelocity side) {
+    goalSetpointSide = new TrapezoidProfile.State(side.baseUnitMagnitude(), 0);
+    targetVelocity = side;
   }
 
+  public Command moveToAngle(ManipulatorPosition position) {
+    Angle angle = ManipulatorConstants.stateToAngle.get(position);
+      return runOnce(() -> {
+        setGoalRot(angle);
+      }
+    );
+  }
+
+  public Command goToVelocity() {
+      return runOnce(() -> {
+        setGoalSide(kVelocity);
+      }
+    );
+  }
 }
+  
