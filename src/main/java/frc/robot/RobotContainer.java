@@ -121,13 +121,21 @@ public class RobotContainer {
 
     drivetrain.registerTelemetry(logger::telemeterize);
 
-    elevatorCommandXboxController.x().onTrue(elevator.runSysId().andThen(new PrintCommand("SysId Complete")));
+    elevatorCommandXboxController
+        .x()
+        .onTrue(elevator.runSysId());
 
-    elevatorCommandXboxController.y().onTrue(elevator.setElevatorHeight(ElevatorState.L1).andThen(new PrintCommand("L1 Set")));
+    elevatorCommandXboxController
+        .y()
+        .onTrue(elevator.setElevatorHeight(ElevatorState.L1));
 
-    elevatorCommandXboxController.a().onTrue(elevator.setElevatorHeight(ElevatorState.L2).andThen(new PrintCommand("L2 Set")));
+    elevatorCommandXboxController
+        .a()
+        .onTrue(elevator.setElevatorHeight(ElevatorState.L2));
 
-    elevatorCommandXboxController.b().onTrue(elevator.setElevatorHeight(ElevatorState.L3).andThen(new PrintCommand("L3 Set")));
+    elevatorCommandXboxController
+        .b()
+        .onTrue(elevator.setElevatorHeight(ElevatorState.L3));
 
     new Trigger(() -> elevatorSimJoystick.getRawButton(1))
         .onTrue(elevator.setElevatorHeight(ElevatorState.BOTTOM));

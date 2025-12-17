@@ -5,6 +5,7 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static edu.wpi.first.units.Units.Radians;
 import static edu.wpi.first.units.Units.Rotations;
 import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Seconds;
 import static edu.wpi.first.units.Units.Volts;
 import static frc.robot.Constants.ElevatorConfig.elevatorSim;
 import static frc.robot.Constants.ElevatorConfig.kMetersPerRotation;
@@ -40,9 +41,9 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   private Distance goalHeight = Meters.of(0.0); // For logging purposes
 
-  private TalonFX leader = new TalonFX(14);
+  private TalonFX leader = new TalonFX(14, "blinky");
 
-  private TalonFX follower = new TalonFX(15);
+  private TalonFX follower = new TalonFX(15, "blinky");
 
   private Follower followerBase = new Follower(14, true);
 
@@ -54,7 +55,7 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   private SysIdRoutine sysIdRoutine =
       new SysIdRoutine(
-          new SysIdRoutine.Config(),
+          new SysIdRoutine.Config(Volts.of(0.5).per(Seconds), Volts.of(2), Seconds.of(6)),
           new SysIdRoutine.Mechanism(
               volts -> leader.setControl(voltageOut.withOutput(volts.in(Volts))),
               log ->
@@ -81,11 +82,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   @Override
-  public void periodic() {
-    if (getHeight().gte(Meters.of(1.55))) {
-      leader.stopMotor();
-    }
-  }
+  public void periodic() {}
 
   @Override
   public void simulationPeriodic() {
@@ -102,11 +99,10 @@ public class ElevatorSubsystem extends SubsystemBase {
   @Logged
   public Command runSysId() {
     return sysIdRoutine
-        .dynamic(Direction.kForward)
-        .andThen(sysIdRoutine.dynamic(Direction.kReverse))
-        .withTimeout(2.5)
+        .quasistatic(Direction.kForward)
         .andThen(sysIdRoutine.quasistatic(Direction.kReverse))
-        .andThen(sysIdRoutine.quasistatic(Direction.kReverse));
+        .andThen(sysIdRoutine.dynamic(Direction.kForward))
+        .andThen(sysIdRoutine.dynamic(Direction.kReverse));
   }
 
   public Angle angleFromHeightOf(Distance distance) {
@@ -161,7 +157,7 @@ public class ElevatorSubsystem extends SubsystemBase {
   public Command setElevatorHeight(ElevatorState height) {
     return run(
         () -> {
-          setHeight(height.getHeight());
+          setHeight(goalHeight);
           goalHeight = height.getHeight();
         });
   }
