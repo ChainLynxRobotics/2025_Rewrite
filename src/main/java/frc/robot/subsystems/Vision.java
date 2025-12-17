@@ -4,19 +4,26 @@ import static edu.wpi.first.units.Units.Meters;
 import static frc.robot.subsystems.VisionConstants.*;
 
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.numbers.*;
 import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 import org.photonvision.EstimatedRobotPose;
 import org.photonvision.PhotonCamera;
 import org.photonvision.PhotonPoseEstimator;
 import org.photonvision.PhotonPoseEstimator.PoseStrategy;
+import org.photonvision.simulation.PhotonCameraSim;
+import org.photonvision.simulation.SimCameraProperties;
+import org.photonvision.simulation.VisionSystemSim;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
@@ -25,13 +32,18 @@ public class Vision extends SubsystemBase {
   private List<CamAndEstimator> cameras = new ArrayList<>();
 
   public Consumer<VisionPose> updateDrivetrain;
+  public Supplier<Pose2d> getSimPose;
+
+  public VisionSystemSim visionSim;
+  public SimCameraProperties cameraProp;
 
   public record CamAndEstimator(PhotonPoseEstimator estimator, PhotonCamera camera) {}
 
   public record VisionPose(Pose3d pose, double timestamp, Matrix<N3, N1> deviation) {}
 
-  public Vision(Consumer<VisionPose> updateDrivetrain) {
+  public Vision(Consumer<VisionPose> updateDrivetrain, Supplier<Pose2d> getSimPose) {
     this.updateDrivetrain = updateDrivetrain;
+    this.getSimPose = getSimPose;
 
     cameras.add(
         new CamAndEstimator(
@@ -44,6 +56,23 @@ public class Vision extends SubsystemBase {
             new PhotonPoseEstimator(
                 kTagLayout, PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR, kCameraOffsets.get(1)),
             new PhotonCamera("aprilTwo")));
+
+    if (!RobotBase.isReal()) {
+      visionSim = new VisionSystemSim("main");
+      visionSim.addAprilTags(kTagLayout);
+      cameraProp = new SimCameraProperties();
+      cameraProp.setCalibration(1280, 800, Rotation2d.fromDegrees(70));
+      cameraProp.setCalibError(0.25, 0.08);
+      cameraProp.setFPS(20);
+      cameraProp.setAvgLatencyMs(35);
+      cameraProp.setLatencyStdDevMs(5);
+
+      for (var cameraRecord : cameras) {
+        PhotonCameraSim cameraSim = new PhotonCameraSim(cameraRecord.camera, cameraProp);
+        cameraSim.enableDrawWireframe(true);
+        visionSim.addCamera(cameraSim, cameraRecord.estimator.getRobotToCameraTransform());
+      }
+    }
   }
 
   public boolean checkTolerance(EstimatedRobotPose pose) {
@@ -118,5 +147,10 @@ public class Vision extends SubsystemBase {
         }
       }
     }
+  }
+
+  @Override
+  public void simulationPeriodic() {
+    visionSim.update(new Pose2d(10, 10, new Rotation2d()));
   }
 }
