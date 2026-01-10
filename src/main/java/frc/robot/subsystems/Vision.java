@@ -76,6 +76,7 @@ public class Vision extends SubsystemBase {
   }
 
   public boolean checkTolerance(EstimatedRobotPose pose) {
+
     double poseAmbiguity = 1;
     double distanceAmbiguity = 1;
 
@@ -99,6 +100,15 @@ public class Vision extends SubsystemBase {
     if (distanceAmbiguity >= kDistanceTolerance) {
       return false;
     }
+    /* 
+       for (var target : pose.targetsUsed) {
+           if (Math.abs(target.getYaw()) < kMaxAngleTolerance) {
+             pose.targetsUsed.remove(target);
+           }
+         }
+    */  
+
+    
 
     return true;
   }
@@ -124,10 +134,16 @@ public class Vision extends SubsystemBase {
     return averageAmbiguity / pose.targetsUsed.size();
   }
 
+  @Override
+  public void periodic() {
+    update();
+  }
+
   public void update() {
     for (var cameraRecord : cameras) {
 
       List<PhotonPipelineResult> data = cameraRecord.camera.getAllUnreadResults();
+      // Logger.recordOutput();
 
       for (PhotonPipelineResult result : data) {
         Optional<EstimatedRobotPose> optionalPoseResult = cameraRecord.estimator.update(result);
@@ -135,12 +151,27 @@ public class Vision extends SubsystemBase {
           continue;
         }
         EstimatedRobotPose poseResult = optionalPoseResult.get();
+        // System.out.println("TEST");
+        if (poseResult.targetsUsed.size() < 2) {
+          System.out.println("NO_TAG");
+          continue;
+        }
+
+        if ((poseResult.estimatedPose.getX() > kFieldWidth)
+            && (poseResult.estimatedPose.getX() < 0)
+            && (poseResult.estimatedPose.getY() > kFieldHeight)
+            && (poseResult.estimatedPose.getY() < 0)) {
+
+          System.out.println("OOB"); // NEED TO ADD BUMPER OFSETS
+          continue;
+        }
+
         if (checkTolerance(poseResult)) {
           Matrix<N3, N1> deviation =
               kBaseDeviation
                   .times(Math.pow(getAverageDistance(poseResult).in(Meters), 1.5))
                   .times(1 / Math.pow(poseResult.targetsUsed.size(), 2))
-                  .times(Math.pow(getAverageAmbiguity(poseResult) * 10, 4));
+                  .times(Math.pow(getAverageAmbiguity(poseResult) * 10, 4)); // was 10
           VisionPose swervePose =
               new VisionPose(poseResult.estimatedPose, result.getTimestampSeconds(), deviation);
           updateDrivetrain.accept(swervePose);
@@ -151,6 +182,6 @@ public class Vision extends SubsystemBase {
 
   @Override
   public void simulationPeriodic() {
-    visionSim.update(new Pose2d(10, 10, new Rotation2d()));
+    visionSim.update(getSimPose.get());
   }
 }
