@@ -6,9 +6,10 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 
 import java.util.Map;
 
+import edu.wpi.first.epilogue.Logged;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
-
+@Logged
 public class ManipulatorConstants {
     public static final Integer kRotationalMotor = 5;
 

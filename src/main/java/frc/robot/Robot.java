@@ -32,7 +32,7 @@ public class Robot extends TimedRobot {
     Epilogue.configure(config -> {
       // Log only to disk, instead of the default NetworkTables logging
       // Note that this means data cannot be analyzed in realtime by a dashboard
-      config.backend = new FileBackend(DataLogManager.getLog());
+      // config.backend = new FileBackend(DataLogManager.getLog());
 
       if (isSimulation()) {
         // If running in simulation, then we'd want to re-throw any errors that
