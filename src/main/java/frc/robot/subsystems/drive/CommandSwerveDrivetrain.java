@@ -32,12 +32,11 @@ import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
 import java.util.function.Supplier;
 
-@Logged
-
 /**
  * Class that extends the Phoenix 6 SwerveDrivetrain class and implements Subsystem so it can easily
  * be used in command-based projects.
  */
+@Logged
 public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Subsystem {
   private static final double kSimLoopPeriod = 0.002; // 2 ms
   private Notifier m_simNotifier = null;
@@ -295,6 +294,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     return getState().Speeds;
   }
 
+  @Logged
   public Pose2d getSimulatedDriveTrainPose() {
     return mapleSimSwerveDrivetrain.mapleSimDrive.getSimulatedDriveTrainPose();
   }
