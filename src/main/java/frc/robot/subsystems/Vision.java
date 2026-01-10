@@ -135,7 +135,7 @@ public class Vision extends SubsystemBase {
     for (var cameraRecord : cameras) {
 
       List<PhotonPipelineResult> data = cameraRecord.camera.getAllUnreadResults();
-      // Logger.recordOutput();
+     
 
       for (PhotonPipelineResult result : data) {
         Optional<EstimatedRobotPose> optionalPoseResult = cameraRecord.estimator.update(result);
@@ -143,9 +143,8 @@ public class Vision extends SubsystemBase {
           continue;
         }
         EstimatedRobotPose poseResult = optionalPoseResult.get();
-        // System.out.println("TEST");
+        
         if (poseResult.targetsUsed.size() < 2) {
-          System.out.println("NO_TAG");
           continue;
         }
 
@@ -154,7 +153,7 @@ public class Vision extends SubsystemBase {
             && (poseResult.estimatedPose.getY() > kFieldHeight)
             && (poseResult.estimatedPose.getY() < 0)) {
 
-          System.out.println("OOB"); // NEED TO ADD BUMPER OFSETS
+           // NEED TO ADD BUMPER OFSETS
           continue;
         }
 
