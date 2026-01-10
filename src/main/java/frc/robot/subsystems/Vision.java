@@ -100,13 +100,7 @@ public class Vision extends SubsystemBase {
     if (distanceAmbiguity >= kDistanceTolerance) {
       return false;
     }
-    /*
-       for (var target : pose.targetsUsed) {
-           if (Math.abs(target.getYaw()) < kMaxAngleTolerance) {
-             pose.targetsUsed.remove(target);
-           }
-         }
-    */
+
 
     return true;
   }
