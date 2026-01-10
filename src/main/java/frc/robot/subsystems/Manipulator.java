@@ -18,8 +18,11 @@ import edu.wpi.first.math.trajectory.TrapezoidProfile.Constraints;
 import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.units.measure.LinearVelocity;
+import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.subsystems.ManipulatorConstants.ManipulatorPosition;
 
 
 public class Manipulator extends SubsystemBase {
@@ -57,6 +60,11 @@ public class Manipulator extends SubsystemBase {
   public Angle targetRotation = Rotation.of(0); 
 
   public AngularVelocity targetVelocity = RotationsPerSecond.of(0);
+
+  SysIdRoutine routine = new SysIdRoutine(
+      new SysIdRoutine.Config(),
+      new SysIdRoutine.Mechanism(this::voltageDrive, null, this)
+  );
 
   public Manipulator() {
     motorConfig
@@ -106,12 +114,12 @@ public class Manipulator extends SubsystemBase {
   public void periodic() {
     periodicSetpointRot = movementProfileRot.calculate(ManipulatorConstants.kT, periodicSetpointRot, goalSetpointRot);
 
-    periodicSetpointSide = movementProfileSide.calculate(ManipulatorConstants.kT, periodicSetpointSide, goalSetpointSide);
+    // periodicSetpointSide = movementProfileSide.calculate(ManipulatorConstants.kT, periodicSetpointSide, goalSetpointSide);
 
 
     double speedRot = pidControlerRotate.calculate(getCurrentAngleRot(), periodicSetpointRot.position); //Get current angle Function
 
-    double speedSide = pidControlerSide.calculate(getCurrentAngleSide(), periodicSetpointSide.position);
+    double speedSide = pidControlerSide.calculate(getCurrentAngularVelocitySide(), targetVelocity.in(DegreesPerSecond));
 
     rotationalMotor.set(speedRot);
     sideMotor.set(speedSide);
@@ -127,9 +135,8 @@ public class Manipulator extends SubsystemBase {
         + ManipulatorConstants.kCadPositionOffset;
   }
 
-  public double getCurrentAngleSide() {
-    return (sideMotor.getAbsoluteEncoder().getPosition() - ManipulatorConstants.kEncoderOffset) * 360
-        + ManipulatorConstants.kCadPositionOffset;
+  public double getCurrentAngularVelocitySide() {
+    return sideMotor.getAbsoluteEncoder().getVelocity() * 360;
   }
 
 
@@ -147,7 +154,7 @@ public class Manipulator extends SubsystemBase {
   }
 
   public void setGoalRot(Angle rotation) {
-    goalSetpointRot = new TrapezoidProfile.State(rotation.baseUnitMagnitude(), 0);
+    goalSetpointRot = new TrapezoidProfile.State(rotation.in(Degrees), 0);
     targetRotation = rotation;
   }
 
@@ -170,5 +177,23 @@ public class Manipulator extends SubsystemBase {
       }
     );
   }
-}
+
+  public void voltageDrive(Voltage voltage) {
+    rotationalMotor.setVoltage(voltage);
+    sideMotor.setVoltage(voltage);
+  }
+
+  public Command sysIdQuasistatic(SysIdRoutine.Direction direction) {
+    return routine.quasistatic(direction);
+  }
   
+  public Command sysIdDynamic(SysIdRoutine.Direction direction) {
+    return routine.dynamic(direction);
+  }
+
+  public Command sysId(SysIdRoutine.Direction direction) {
+    return sysIdQuasistatic(direction).andThen(sysIdDynamic(direction));
+  }
+
+}
+

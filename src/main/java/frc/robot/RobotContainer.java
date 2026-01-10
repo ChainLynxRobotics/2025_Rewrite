@@ -88,6 +88,11 @@ public class RobotContainer {
         operatorController.a().onTrue(manipulator.moveToAngle(ManipulatorConstants.ManipulatorPosition.L1_SCORE));
         operatorController.b().onTrue(manipulator.moveToAngle(ManipulatorConstants.ManipulatorPosition.L2_SCORE));
         operatorController.y().onTrue(manipulator.moveToAngle(ManipulatorConstants.ManipulatorPosition.L4_SCORE));
+
+        operatorController.x().onTrue(manipulator.goToVelocity());
+
+
+
     }
 
     public Command getAutonomousCommand() {

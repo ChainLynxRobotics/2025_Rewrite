@@ -10,9 +10,9 @@ import edu.wpi.first.units.measure.Angle;
 import edu.wpi.first.units.measure.AngularVelocity;
 
 public class ManipulatorConstants {
-    public static final Integer kRotationalMotor = 12;
+    public static final Integer kRotationalMotor = 5;
 
-    public static final Integer kSideMotor = 13;
+    public static final Integer kSideMotor = 6;
 
     public static final double kP = 0.020; // proportion
     public static final double kI = 0.002; // integral
@@ -28,7 +28,11 @@ public class ManipulatorConstants {
     public static final double kCadPositionOffset = 50; // Adjustment for odd alignment in the CAD
     public static final double kEncoderOffset = 0.935;
 
-    public static final AngularVelocity kVelocity = RotationsPerSecond.of(10);
+    public static final double kManipulatorCir = 12.41;
+    public static final double kManipulatorRatio = 4;
+
+
+    public static final AngularVelocity kVelocity = RotationsPerSecond.of(13/(kManipulatorCir*kManipulatorRatio)); //13 is 13 meter per second launch speed.
 
     public enum ManipulatorPosition {
         STOWED,   
