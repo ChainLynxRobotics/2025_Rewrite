@@ -285,11 +285,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
         visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
   }
 
-  public Pose2d getSimPose() {
+  public Pose2d getSimulatedDrivetrainPose() {
     return getState().Pose;
   }
 
   public void passVisionPose(VisionPose pose) {
-    addVisionMeasurement(pose.pose().toPose2d(), pose.timestamp(), pose.deviation());
+    addVisionMeasurement(
+        pose.pose().toPose2d(), Utils.fpgaToCurrentTime(pose.timestamp()), pose.deviation());
   }
 }
