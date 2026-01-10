@@ -130,17 +130,16 @@ public class Manipulator extends SubsystemBase {
   public void simulationPeriodic() {
     // This method will be called once per scheduler run during simulation
   }
-
+  @Logged
   public double getCurrentAngleRot() {
-    return (rotationalMotor.getAbsoluteEncoder().getPosition() - ManipulatorConstants.kEncoderOffset) * 360
-        + ManipulatorConstants.kCadPositionOffset;
+    return (rotationalMotor.getAbsoluteEncoder().getPosition() * 360);
   }
-
+  @Logged
   public double getCurrentAngularVelocitySide() {
     return sideMotor.getAbsoluteEncoder().getVelocity() * 360;
   }
 
-
+  @Logged
   public boolean isAtPositionRot() {
     return pidControlerRotate.atSetpoint();
   }
@@ -152,6 +151,12 @@ public class Manipulator extends SubsystemBase {
   public void reset() {
     setGoalRot(Rotations.of(0));
     setGoalSide(RotationsPerSecond.of(0));
+  }
+
+  public Command stopRollers() {
+    return runOnce(() -> {
+      setGoalSide(RotationsPerSecond.of(0));
+    });
   }
 
   public void setGoalRot(Angle rotation) {

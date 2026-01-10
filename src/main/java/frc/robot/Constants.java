@@ -1,0 +1,164 @@
+package frc.robot;
+
+import static edu.wpi.first.units.Units.*;
+
+import com.ctre.phoenix6.configs.MotionMagicConfigs;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import edu.wpi.first.epilogue.Logged;
+import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.AngularAcceleration;
+import edu.wpi.first.units.measure.AngularVelocity;
+import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.wpilibj.simulation.ElevatorSim;
+
+public class Constants {
+  public static final class ElevatorConfig {
+    // Elevator measurements
+    public static final Distance kL1Height = Millimeters.of(185.42);
+    public static final Distance kL2Height = Millimeters.of(337.82);
+    public static final Distance kL3Height = Millimeters.of(711.2);
+    public static final Distance kL4Height = Millimeters.of(1546.86); // 1546
+    public static final Distance kHumanPlayerHeight = Millimeters.of(431.8);
+    public static final Distance kL2AlgaeHeight = Millimeters.of(355.6);
+    public static final Distance kL3AlgaeHeight = Millimeters.of(889);
+    public static final int kMotorNumber = 2;
+    public static final double kGearing = 3;
+    public static final double kCarriageMass = 26.914545;
+    public static final double kDrumRadius = 0.0285;
+    public static final Distance kMinHeight = Millimeters.of(0.0);
+    public static final Distance kMaxHeight = Millimeters.of(660.4 + 657.225 + 400.05);
+    public static final boolean kSimulateGravity = true;
+    public static final double kStartingHeight = 0.0;
+    public static final double kStandardDeviation = 0.0;
+
+    public static final Distance kPullyRadius = Millimeters.of(28.5);
+    public static final Angle kFullExtensionAngle =
+        Radians.of(kMaxHeight.div(kPullyRadius).magnitude());
+
+    public static final double kT = 0.02;
+
+    // ...........................................................................................//
+    // ...........................................................................................//
+
+    // PID constants
+    public static double kP = 1.0;
+
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
+
+    // Feedforward constants
+    public static final double kV = 0.69231;
+    public static final double kA = 0.058414;
+    public static final double kG = 0.7205;
+    public static final double kS = 0.2;
+
+    // Trapezoid profile constraints constants (rotations per second)
+    public static final AngularVelocity kMaxVelocity = RotationsPerSecond.of(6.0 * Math.PI);
+    public static final AngularAcceleration kMaxAcceleration =
+        RotationsPerSecondPerSecond.of(4.5 * Math.PI);
+
+    // ...........................................................................................//
+    // ...........................................................................................//
+
+    // Sim PID constants
+    public static final double kSimP = 6;
+    public static final double kSimI = 0.0;
+    public static final double kSimD = 0.0;
+
+    // Sim Feedforward constants
+    public static final double kSimS = 0.0;
+    public static final double kSimG = 2.13037;
+    public static final double kSimV = 0.3375;
+    public static final double kSimA = 0.035;
+
+    // Sim Trapezoid profile constraints constants (rotations per second)
+    public static final AngularVelocity kSimMaxVelocity = RotationsPerSecond.of(1.0);
+    public static final AngularAcceleration kSimMaxAcceleration =
+        RotationsPerSecondPerSecond.of(1.0);
+
+    // ...........................................................................................//
+    // ...........................................................................................//
+
+    // Conversion from motor rotations to elevator height
+    public static final double kMetersPerRotation =
+        (kMaxHeight).in(Meters) / (kFullExtensionAngle.in(Rotations));
+
+    public static final ElevatorSim elevatorSim =
+        new ElevatorSim(
+            DCMotor.getKrakenX60(kMotorNumber),
+            kGearing,
+            kCarriageMass,
+            kDrumRadius,
+            kMinHeight.in(Millimeters),
+            kMaxHeight.in(Millimeters),
+            kSimulateGravity,
+            kStartingHeight);
+
+    // ...........................................................................................//
+    // ...........................................................................................//
+
+    public static final TalonFXConfiguration talonFXConfiguration = new TalonFXConfiguration();
+
+    public static final Slot0Configs slot0Configs =
+        new Slot0Configs()
+            .withKP(kP)
+            .withKI(kI)
+            .withKD(kD)
+            .withKV(kV)
+            .withKA(kA)
+            .withKG(kG)
+            .withKS(kS);
+
+    public static final MotionMagicConfigs motionMagicConfigs =
+        new MotionMagicConfigs()
+            .withMotionMagicCruiseVelocity(kMaxVelocity)
+            .withMotionMagicAcceleration(kMaxAcceleration);
+
+    // ...........................................................................................//
+    // ...........................................................................................//
+
+    public static final TalonFXConfiguration simTalonFXConfiguration = new TalonFXConfiguration();
+
+    public static final Slot0Configs simSlot0Configs =
+        new Slot0Configs()
+            .withKP(kSimP)
+            .withKI(kSimI)
+            .withKD(kSimD)
+            .withKV(kSimV)
+            .withKA(kSimA)
+            .withKG(kSimG)
+            .withKS(kSimS);
+
+    public static final MotionMagicConfigs simMotionMagicConfigs =
+        new MotionMagicConfigs()
+            .withMotionMagicCruiseVelocity(kSimMaxVelocity)
+            .withMotionMagicAcceleration(kSimMaxAcceleration);
+
+    // ...........................................................................................//
+    // ...........................................................................................//
+
+    // Elevator heights by state
+    public enum ElevatorState {
+      BOTTOM(kMinHeight),
+      L1(kL1Height),
+      L2(kL2Height),
+      L3(kL3Height),
+      L4(kL4Height),
+      HUMANPLAYER(kHumanPlayerHeight),
+      L2ALGAE(kL2AlgaeHeight),
+      L3ALGAE(kL3AlgaeHeight);
+
+      public final Distance height;
+
+      ElevatorState(Distance height) {
+        this.height = height;
+      }
+
+      public Distance getHeight() {
+        return height;
+      }
+    }
+  }
+}
