@@ -30,6 +30,7 @@ import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.generated.TunerConstants;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
+import frc.robot.subsystems.Vision.VisionPose;
 import java.util.function.Supplier;
 
 /**
@@ -329,5 +330,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
       mapleSimSwerveDrivetrain.mapleSimDrive.setSimulationWorldPose(pose);
     Timer.delay(0.1); // wait for simulation to update
     super.resetPose(pose);
+  }
+
+  public Pose2d getSimulatedDrivetrainPose() {
+    return getState().Pose;
+  }
+
+  public void passVisionPose(VisionPose pose) {
+    addVisionMeasurement(
+        pose.pose().toPose2d(), Utils.fpgaToCurrentTime(pose.timestamp()), pose.deviation());
   }
 }
